@@ -1,0 +1,111 @@
+<table id="datagrid_linkstab" toolbar="#tb" class="datagrid">
+    <thead>
+        <tr>
+            <th data-options="field:'id',align:'center'" rowspan="2" width="150">友情链接编号</th>
+            <th data-options="field:'linkname'" width="250">友情链接名称</th>
+            <th data-options="field:'linkurl'" width="129">链接网址</th>
+            <th data-options="field:'linktype'" width="105">链接分类</th>
+            <th data-options="field:'view'" width="30">操作</th>
+        </tr>
+    </thead>
+</table>
+<div id="tb" style="padding:5px;height:auto">
+		<div style="margin-bottom:5px">
+			<a href="#" id="btnadd_linkstab" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+			<a href="#" id="btndel_linkstab" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+		</div>
+</div>
+<script>
+$(function(){
+	var height = $('.indexcenter').height();
+	var classId = 'linkstab';
+	var hrefadd = 'friendlink/add.html';
+	var hrefcancel = 'friendlink/del.html';
+	var urljson = 'friendlink/listJsonId.html?id=0';
+	//openDatagrid(classId,urljson,hrefadd,hrefedit,hrefcancel);
+	$('#datagrid_'+classId).datagrid({
+		url:urljson,
+		idField:'id',
+		pagination:true,
+		rownumbers:true,
+		fitColumns:true,
+		checkbox:true,
+		height:height-65,
+		//singleSelect:true,
+		columns:[[  
+		{
+			field:'id',
+			align:'center',
+			title:'友情链接编号',
+			width:150
+		},{
+			field:'linkname',
+			title:'友情链接名称',
+			width:250
+		},{
+			field:'linkurl',
+			title:'链接网址',
+			width:129,
+		},{
+			field:'linktype',
+			title:'链接分类',
+			width:105
+		},{
+			field:'action',
+			align:'center',
+			title:'操作',
+			width:50,
+			formatter : function(value, row, index) {
+				//alert(row.id);
+				return '<img src="../../themes/icons/pencil.png" width="16" height="16" onclick="admin_links_editFun(\''+row.id+'\')" />&nbsp;<img src="../../themes/icons/cancel.png" width="16" height="16" onclick="admin_links_cancelFun(\''+row.id+'\')" />&nbsp;';
+			}
+		}
+		]],	
+		frozenColumns:[[
+				{
+					field:'ck',
+					checkbox:true
+				}
+			]]
+	});
+	var p = $('#datagrid_'+classId).datagrid('getPager');
+	$(p).pagination({
+		pageSize: 20,//每页显示的记录条数，默认为10
+		pageList: [10,20,30,40,50,100],//可以设置每页记录条数的列表
+		beforePageText: '第',//页数文本框前显示的汉字
+		afterPageText: '页    共 {pages} 页',
+		displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录'
+	})
+	$('#btnadd_linkstab').click(function() {
+		var title = '添加链接';
+		openDialog(classId,hrefadd,title);
+	});
+	$('#btndel_linkstab').click(function() {
+		var title = '删除链接';
+		var ids = [];
+		var rows = $('#datagrid_'+classId).datagrid('getSelections');
+		for(var i=0;i<rows.length;i++){
+			ids.push(rows[i].id);
+		}
+		if(ids==''){
+			$.messager.alert('信息提示', '请选择要操作的项', 'error');
+			return false;
+		}
+		var href = hrefcancel;
+		var title = '删除信息';
+		$.messager.confirm(title,href, function(){
+			$.ajax({
+				url:href,
+				type:'post',
+				data:{
+					id:ids
+				},
+				dataType:'json',
+				success:function(data){
+					formAjax(data,classId);
+				}
+			});
+		});//$
+	});
+})
+</script>
